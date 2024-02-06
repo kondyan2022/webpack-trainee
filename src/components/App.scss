@@ -1,0 +1,8 @@
+button {
+  background-color: red;
+  cursor: pointer;
+
+  &:hover {
+    background-color: green;
+  }
+}
