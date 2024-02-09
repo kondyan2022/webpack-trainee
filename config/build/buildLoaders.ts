@@ -7,8 +7,26 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
   const isProd = !isDev;
 
   const assetLoader = {
-    test: /\.(png|svg|jpg|jpeg|gif)$/i,
+    test: /\.(png|jpg|jpeg|gif)$/i,
     type: "asset/resource",
+  };
+
+  const svgLoader = {
+    test: /\.svg$/i,
+    issuer: /\.[jt]sx?$/,
+    use: [
+      {
+        loader: "@svgr/webpack",
+        options: {
+          icon: true,
+          svgoConfig: {
+            plugins: [
+              { name: "convertColors", params: { currentColor: true } },
+            ],
+          },
+        },
+      },
+    ],
   };
 
   const cssLoaderWithModules = {
@@ -35,5 +53,5 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
     exclude: /node_modules/,
   };
 
-  return [assetLoader, scssLoader, tsLoader];
+  return [assetLoader, svgLoader, scssLoader, tsLoader];
 }
