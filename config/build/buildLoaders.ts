@@ -1,13 +1,15 @@
 import { ModuleOptions } from "webpack";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import { BuildOptions } from "./types/types";
+import ReactRefreshTypeScript from "react-refresh-typescript";
+import { buildBabelLoader } from "./babel/buildBabelLoader";
 
 export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
   const isDev = options.mode === "development";
   const isProd = !isDev;
 
   const assetLoader = {
-    test: /\.(png|jpg|jpeg|gif)$/i,
+    test: /\.(png|jpg|jpeg|gif|webp)$/i,
     type: "asset/resource",
   };
 
@@ -49,9 +51,27 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
   //ts-loader підтримує JSX. Якщо не Typescript то потрібен babel-loader
   const tsLoader = {
     test: /\.tsx?$/,
-    use: "ts-loader",
+    use: [
+      {
+        loader: "ts-loader",
+        options: {
+          getCustomTransformers: () => ({
+            before: [isDev && ReactRefreshTypeScript()].filter(Boolean),
+          }),
+          transpileOnly: true,
+        },
+      },
+    ],
     exclude: /node_modules/,
   };
 
-  return [assetLoader, svgLoader, scssLoader, tsLoader];
+  const babelLoader = buildBabelLoader(options);
+
+  return [
+    assetLoader,
+    scssLoader,
+    // tsLoader,
+    babelLoader,
+    svgLoader,
+  ];
 }
